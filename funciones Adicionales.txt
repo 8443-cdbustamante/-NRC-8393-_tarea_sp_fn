@@ -1,0 +1,334 @@
+---------------------Numero de personas que estan asignadas a determinado rol y que sean administradores
+
+Select role."var_nombre_rol", count(pers."var_cedula_per")
+from tb_personal pers
+ inner join tb_administrador admi on pers."var_cedula_per" = admi."var_cedula_per"
+ inner join tb_ficha_ensamblaje fich on pers."var_cedula_per" = fich."var_cedula_per" 
+ inner join tb_rol role on role."var_id_rol" = fich."var_id_rol"
+ where role."var_status_rol" like 'Activo'
+ group by role."var_nombre_rol";
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION f_ventas1(rol varchar2) 
+RETURN NUMBER
+IS
+    res number;
+BEGIN
+    select count(pers."var_cedula_per")
+    INTO res
+    from tb_personal pers
+    inner join tb_administrador admi on pers."var_cedula_per" = admi."var_cedula_per"
+    inner join tb_ficha_ensamblaje fich on pers."var_cedula_per" = fich."var_cedula_per" 
+    inner join tb_rol role on role."var_id_rol" = fich."var_id_rol"
+    where role."var_status_rol" like 'Activo' and role."var_nombre_rol" = rol
+    group by role."var_nombre_rol";
+    
+    RETURN res;
+END ;
+/
+
+SELECT f_ventas1('Ensamblador')
+FROM DUAL;
+
+
+
+
+
+
+
+
+
+
+
+---------------------Liste por especialidad de ingenieria la cantidad de personal femenino
+que estan asignados a misiles en status listo
+
+select inge."var_especialidad_ing", count(mis."var_id_mis")
+from tb_personal pers
+ inner join tb_ingeniero inge on pers."var_cedula_per" = inge."var_cedula_per"
+ inner join tb_ficha_ensamblaje fich on pers."var_cedula_per" = fich."var_cedula_per" 
+ inner join tb_misil mis on mis."var_id_mis" = fich."var_id_mis"
+ where mis."var_status_mis" like 'Listo' AND pers."var_genero_per" like 'female'
+ group by inge."var_especialidad_ing";
+
+
+
+
+
+CREATE OR REPLACE FUNCTION f_ventas2(especialidad varchar2) 
+RETURN NUMBER
+IS
+    res number;
+BEGIN
+    select count(mis."var_id_mis")
+    into res
+    from tb_personal pers
+    inner join tb_ingeniero inge on pers."var_cedula_per" = inge."var_cedula_per"
+    inner join tb_ficha_ensamblaje fich on pers."var_cedula_per" = fich."var_cedula_per" 
+    inner join tb_misil mis on mis."var_id_mis" = fich."var_id_mis"
+    where mis."var_status_mis" like 'Listo' AND pers."var_genero_per" like 'female' AND inge."var_especialidad_ing"=especialidad
+    group by inge."var_especialidad_ing";
+    
+    RETURN res;
+END ;
+/
+
+SELECT f_ventas2('Telecomunicaciones')
+FROM DUAL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------Numero de componentes que tiene un misil
+
+Select mis."var_nombre_mis", count(com."var_id_com")
+from tb_items itm
+inner join tb_misil mis on mis."var_id_mis"=itm."var_id_mis"
+inner join tb_componente com on com."var_id_com"=itm."var_id_com"
+order by mis."var_nombre_mis";
+
+
+
+
+CREATE OR REPLACE FUNCTION f_ventas3(nombremisil varchar2) 
+RETURN NUMBER
+IS
+    res number;
+BEGIN
+    Select count(com."var_id_com")
+    into res
+    from tb_items itm
+    inner join tb_misil mis on mis."var_id_mis"=itm."var_id_mis"
+    inner join tb_componente com on com."var_id_com"=itm."var_id_com"
+    where mis."var_nombre_mis"=nombremisil
+    order by mis."var_nombre_mis";
+
+    RETURN res;
+END ;
+/
+
+SELECT f_ventas3('misil-A')
+FROM DUAL;
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------Numero de piezas que tiene un componente
+
+Select com."var_id_com", com."var_nombre_com", count(pieza."var_id_pieza")
+from tb_contenido cont
+inner join tb_componente com on com."var_id_com"=cont."var_id_com"
+inner join tb_pieza pieza on pieza."var_id_pieza"=cont."var_id_pieza"
+order by com."var_nombre_com";
+
+
+CREATE OR REPLACE FUNCTION f_ventas4(nombrecomponente varchar2) 
+RETURN NUMBER
+IS
+    res number;
+BEGIN
+    Select count(pieza."var_id_pieza")
+    into res
+    from tb_contenido cont
+    inner join tb_componente com on com."var_id_com"=cont."var_id_com"
+    inner join tb_pieza pieza on pieza."var_id_pieza"=cont."var_id_pieza"
+    where com."var_nombre_com"=nombrecomponente
+    order by com."var_nombre_com";
+
+    RETURN res;
+END ;
+/
+
+SELECT f_ventas4('Compt LGR2349-FAKE')
+FROM DUAL;
+
+
+
+
+
+
+
+
+---------------------Cantidad de piezas que provee cada proveedor 
+Select pro."var_nombre_pro", count(pieza."var_id_pieza")
+from tb_stock stc
+inner join tb_proveedor pro on pro."var_id_pro"=stc."var_id_pro"
+inner join tb_pieza pieza on pieza."var_id_pieza"=stc."var_id_pieza"
+group by pro."var_nombre_pro";
+
+
+
+
+CREATE OR REPLACE FUNCTION f_ventas5(nombreproveedor varchar2) 
+RETURN NUMBER
+IS
+    res number;
+BEGIN
+    Select count(pieza."var_id_pieza")
+    into res
+    from tb_stock stc
+    inner join tb_proveedor pro on pro."var_id_pro"=stc."var_id_pro"
+    inner join tb_pieza pieza on pieza."var_id_pieza"=stc."var_id_pieza"
+    where pro."var_nombre_pro" = nombreproveedor
+    group by pro."var_nombre_pro";
+
+    RETURN res;
+END ;
+/
+
+SELECT f_ventas5('Company Lopez-Young')
+FROM DUAL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------Por departamentos cuantos personales hay
+
+select dept."var_nombre_dept", count(pers."var_cedula_per")
+from tb_departamento dept
+inner join tb_personal pers on pers."var_id_dept" = dept."var_id_dept"
+group by dept."var_nombre_dept";
+
+
+
+CREATE OR REPLACE FUNCTION f_ventas6(nombredepartamento varchar2) 
+RETURN NUMBER
+IS
+    res number;
+BEGIN
+    select count(pers."var_cedula_per")
+    into res
+    from tb_departamento dept
+    inner join tb_personal pers on pers."var_id_dept" = dept."var_id_dept"
+    where dept."var_nombre_dept"=nombredepartamento
+    group by dept."var_nombre_dept";
+
+
+    RETURN res;
+END ;
+/
+
+SELECT f_ventas6('Departamento de Estructura')
+FROM DUAL;
+
+
+
+
+
+
+
+
+
+
+
+
+------- De acuerdo al nombre de la persona hacer lista de misiles que esta en la ficha de ensamblaje -------
+
+Select pers."var_nombre_per", mis."var_nombre_mis"
+from tb_ficha_ensamblaje fichens
+inner join tb_personal pers on pers."var_cedula_per"=fichens."var_cedula_per"
+inner join tb_misil mis on mis."var_id_mis"=fichens."var_id_mis"
+group by pers."var_nombre_per";
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION f_ventas7(nombrepersonal varchar2) 
+RETURN NUMBER
+IS
+    res number;
+BEGIN
+    Select mis."var_nombre_mis"
+    into res
+    from tb_ficha_ensamblaje fichens
+    inner join tb_personal pers on pers."var_cedula_per"=fichens."var_cedula_per"
+    inner join tb_misil mis on mis."var_id_mis"=fichens."var_id_mis"
+    where pers."var_nombre_per"=nombrepersonal
+    group by pers."var_nombre_per";
+    
+    RETURN res;
+END ;
+/
+
+SELECT f_ventas7('Beth Ellison')
+FROM DUAL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------Lista de cuantos misiles estan asignados a determinados roles
+
+select rol."var_nombre_rol", count(mis."var_id_mis")
+from tb_ficha_ensamblaje fichens
+ inner join tb_rol rol on rol."var_id_rol" = fichens."var_id_rol"
+ inner join tb_misil mis on mis."var_id_mis" = fichens."var_id_mis"
+ group by rol."var_nombre_rol";
+
+
+
+CREATE OR REPLACE FUNCTION f_ventas8(nombrerol varchar2) 
+RETURN NUMBER
+IS
+    res number;
+BEGIN
+    select count(mis."var_id_mis")
+    into res
+    from tb_ficha_ensamblaje fichens
+    inner join tb_rol rol on rol."var_id_rol" = fichens."var_id_rol"
+    inner join tb_misil mis on mis."var_id_mis" = fichens."var_id_mis"
+    where rol."var_nombre_rol"=nombrerol
+    group by rol."var_nombre_rol";
+
+    
+    RETURN res;
+END ;
+/
+
+SELECT f_ventas8('Ensamblador')
+FROM DUAL;
